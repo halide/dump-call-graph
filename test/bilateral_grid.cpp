@@ -1,6 +1,6 @@
 #include "Halide.h"
 #include <stdio.h>
-#include "DumpCallGraph.h"
+#include "../DumpCallGraph.h"
 
 using namespace Halide;
 
