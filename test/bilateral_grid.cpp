@@ -5,16 +5,9 @@
 using namespace Halide;
 
 int main(int argc, char **argv) {
-    if (argc < 2) {
-        printf("Usage: bilateral_grid <s_sigma>\n");
-        // printf("Spatial sigma is a compile-time parameter, please provide it as an argument.\n"
-        //        "(llvm's ptx backend doesn't handle integer mods by non-consts yet)\n");
-        return 0;
-    }
-
     ImageParam input(Float(32), 2);
     Param<float> r_sigma;
-    int s_sigma = atoi(argv[1]);
+    int s_sigma = 8; //atoi(argv[1]);
     Var x("x"), y("y"), z("z"), c("c");
 
     // Add a boundary condition
@@ -70,30 +63,6 @@ int main(int argc, char **argv) {
     // Normalize
     Func bilateral_grid("bilateral_grid");
     bilateral_grid(x, y) = interpolated(x, y, 0)/interpolated(x, y, 1);
-
-    std::string target = get_target();
-    if (target.find("ptx") != std::string::npos) {
-
-        // GPU schedule
-        grid.compute_root().reorder(z, c, x, y).cuda_tile(x, y, 8, 8);
-
-        // Compute the histogram into shared memory before spilling it to global memory
-        histogram.store_at(grid, Var("blockidx")).compute_at(grid, Var("threadidx"));
-
-        blurx.compute_root().cuda_tile(x, y, z, 16, 16, 1);
-        blury.compute_root().cuda_tile(x, y, z, 16, 16, 1);
-        blurz.compute_root().cuda_tile(x, y, z, 8, 8, 4);
-        bilateral_grid.compute_root().cuda_tile(x, y, s_sigma, s_sigma);
-    } else {
-
-        // CPU schedule
-        grid.compute_root().reorder(c, z, x, y).parallel(y);
-        histogram.compute_at(grid, x).unroll(c);
-        blurx.compute_root().parallel(z).vectorize(x, 4);
-        blury.compute_root().parallel(z).vectorize(x, 4);
-        blurz.compute_root().parallel(z).vectorize(x, 4);
-        bilateral_grid.compute_root().parallel(y).vectorize(x, 4);
-    }
 
     dump_call_graph("bilateral_grid.calls.json", bilateral_grid);
 
