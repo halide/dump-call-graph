@@ -114,6 +114,6 @@ void dump_call_graph(const std::string &outfilename, Func root) {
         }
     }
 
-    fprintf(of, "\n[\n");
+    fprintf(of, "\n]\n");
     fclose(of);
 }
