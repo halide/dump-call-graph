@@ -5,3 +5,5 @@ camera_pipe
 camera_pipe.calls.json
 local_laplacian
 local_laplacian.calls.json
+halide_blur
+halide_blur.calls.json
