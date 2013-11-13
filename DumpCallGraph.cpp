@@ -67,6 +67,35 @@ public:
     }
 };
 
+void dump_function(FILE *of, const std::string name, const Function &f) {
+    fprintf(of, " {\"name\": \"%s\", ", name.c_str());
+    fprintf(of, "\"vars\": [");
+    for (size_t i = 0; i < f.args().size(); i++) {
+        fprintf(of, "\"%s\"", f.args()[i].c_str());
+        if (i < f.args().size()-1) {
+            fprintf(of, ", ");
+        }
+    }
+    fprintf(of, "], ");
+
+    fprintf(of, "\"calls\": [");
+    FindAllCalls local_calls(false);
+    for (size_t i = 0; i < f.values().size(); i++) {
+        f.values()[i].accept(&local_calls);
+    }
+    local_calls.dump_calls(of);
+    fprintf(of, "], ");
+
+    // don't log reduction_value calls - these can't be meaningfully scheduled wrt. this function
+    fprintf(of, "\"update_calls\": [");
+    FindAllCalls update_calls(false);
+    for (size_t i = 0; i < f.reduction_values().size(); i++) {
+        f.reduction_values()[i].accept(&update_calls);
+    }
+    update_calls.dump_calls(of);
+    fprintf(of, "]}");
+}
+
 void dump_call_graph(const std::string &outfilename, Func root) {
     FILE *of = fopen(outfilename.c_str(), "w");
 
@@ -81,38 +110,13 @@ void dump_call_graph(const std::string &outfilename, Func root) {
 
     FindAllCalls::iterator it = all_calls.calls.begin();
     while (it != all_calls.calls.end()) {
-        fprintf(of, " {\"name\": \"%s\", ", it->first.c_str());
-        fprintf(of, "\"vars\": [");
-        for (size_t i = 0; i < it->second.args().size(); i++) {
-            fprintf(of, "\"%s\"", it->second.args()[i].c_str());
-            if (i < it->second.args().size()-1) {
-                fprintf(of, ", ");
-            }
-        }
-        fprintf(of, "], ");
-
-        fprintf(of, "\"calls\": [");
-        FindAllCalls local_calls(false);
-        for (size_t i = 0; i < it->second.values().size(); i++) {
-            it->second.values()[i].accept(&local_calls);
-        }
-        local_calls.dump_calls(of);
-        fprintf(of, "], ");
-
-        // don't log reduction_value calls - these can't be meaningfully scheduled wrt. this function
-        fprintf(of, "\"update_calls\": [");
-        FindAllCalls update_calls(false);
-        for (size_t i = 0; i < it->second.reduction_values().size(); i++) {
-            it->second.reduction_values()[i].accept(&update_calls);
-        }
-        update_calls.dump_calls(of);
-        fprintf(of, "]}");
+        dump_function(of, it->first, it->second);
+        fprintf(of, ",\n");
 
         ++it;
-        if (it != all_calls.calls.end()) {
-            fprintf(of, ",\n");
-        }
     }
+    // dump the root function, too:
+    dump_function(of, root.name(), f);
 
     fprintf(of, "\n]\n");
     fclose(of);
