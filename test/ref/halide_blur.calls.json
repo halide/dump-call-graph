@@ -1,0 +1,4 @@
+[
+ {"name": "blur_x", "vars": ["x", "y"], "calls": [], "update_calls": []},
+ {"name": "blur_y", "vars": ["x", "y"], "calls": ["blur_x"], "update_calls": []}
+]

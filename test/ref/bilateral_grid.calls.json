@@ -1,0 +1,10 @@
+[
+ {"name": "blurx", "vars": ["x", "y", "z", "c"], "calls": ["grid"], "update_calls": []},
+ {"name": "blury", "vars": ["x", "y", "z", "c"], "calls": ["blurx"], "update_calls": []},
+ {"name": "blurz", "vars": ["x", "y", "z", "c"], "calls": ["blury"], "update_calls": []},
+ {"name": "clamped", "vars": ["x", "y"], "calls": [], "update_calls": []},
+ {"name": "grid", "vars": ["x", "y", "z", "c"], "calls": ["histogram"], "update_calls": []},
+ {"name": "histogram", "vars": ["x", "y", "v6", "c"], "calls": [], "update_calls": ["clamped", "histogram"]},
+ {"name": "interpolated", "vars": ["x", "y", "c"], "calls": ["blurz", "clamped"], "update_calls": []},
+ {"name": "bilateral_grid", "vars": ["x", "y"], "calls": ["interpolated"], "update_calls": []}
+]
