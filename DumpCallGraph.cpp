@@ -1,3 +1,6 @@
+// TODO: refactor in terms of find_direct_calls/find_transitive_calls
+//       Challenge: this dump requires distinguishing calls in each update from those in the pure definition (I think?)
+
 // TODO: docs
 // TODO: calls in reduction index terms/bounds
 
