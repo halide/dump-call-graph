@@ -6,7 +6,7 @@ def main(args):
     assert(len(args) == 1)
     cgfile = args[0]
     print >>sys.stderr, "WARNING: does not yet process update calls, etc."
-    g = gv.AGraph()
+    g = gv.AGraph(directed=True)
     cg = json.load(open(cgfile))
     for f in cg:
         for f2 in f['calls']:
