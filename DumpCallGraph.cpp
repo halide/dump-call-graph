@@ -41,9 +41,10 @@ public:
                     f.values()[i].accept(this);
                 }
                 // recursively add everything called in the definition of f's update step
-                for (size_t i = 0; i < f.reductions().size(); i++) {
-                    for (size_t j = 0; j < f.reductions()[i].values.size(); j++) {
-                        f.reductions()[i].values[j].accept(this);
+
+                for(size_t i = 0; i < f.updates().size(); i++) {
+                    for (size_t j = 0; j < f.updates()[i].values.size(); j++) {
+                        f.updates()[i].values[j].accept(this);
                     }
                 }
             }
@@ -94,9 +95,10 @@ void dump_function(FILE *of, const std::string name, const Function &f) {
     // don't log reduction_value calls - these can't be meaningfully scheduled wrt. this function
     fprintf(of, "\"update_calls\": [");
     FindAllCalls update_calls(false);
-    for (size_t i = 0; i < f.reductions().size(); i++) {
-        for (size_t j = 0; j < f.reductions()[i].values.size(); j++) {
-            f.reductions()[i].values[j].accept(&update_calls);
+
+    for(size_t i = 0; i < f.updates().size(); i++) {
+        for (size_t j = 0; j < f.updates()[i].values.size(); j++) {
+            f.updates()[i].values[j].accept(&update_calls);
         }
     }
     update_calls.dump_calls(of);
